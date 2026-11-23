@@ -1,0 +1,13 @@
+// /etc/bind/named.conf.options (example). Replace 192.168.1.0/24 with your network.
+options {
+    directory "/var/cache/bind";
+
+    forwarders { 1.1.1.1; 8.8.8.8; };
+
+    // Only answer your own network (never become an open resolver)
+    allow-query { localhost; 192.168.1.0/24; };
+    allow-recursion { localhost; 192.168.1.0/24; };
+
+    dnssec-validation auto;
+    listen-on-v6 { any; };
+};

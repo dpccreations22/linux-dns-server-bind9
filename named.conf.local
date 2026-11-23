@@ -1,0 +1,5 @@
+// /etc/bind/named.conf.local (example)
+zone "home.arpa" {
+    type master;
+    file "/etc/bind/db.home.arpa";
+};

@@ -1,0 +1,59 @@
+LINUX DNS CONFIGURATION - BUILD YOUR OWN DNS SERVER ON UBUNTU (BIND9)
+All commands from the video, in order.
+
+Replace the example values with YOUR OWN:
+  192.168.1.0/24   your network
+  192.168.1.10     your DNS server's address
+  192.168.1.20/30  your devices' addresses
+The example config files are in this repository (named.conf.options, named.conf.local, db.home.arpa).
+
+------------------------------------------------------------
+STEP 1 - INSTALL BIND9
+------------------------------------------------------------
+sudo apt install bind9 bind9-utils bind9-dnsutils
+systemctl status named            # look for: active (running)
+
+------------------------------------------------------------
+STEP 2 - FORWARDERS (and don't become an open resolver)
+------------------------------------------------------------
+sudo nano /etc/bind/named.conf.options
+# add forwarders, allow-query and allow-recursion (see named.conf.options in this repo)
+
+------------------------------------------------------------
+STEP 3 - DECLARE THE ZONE
+------------------------------------------------------------
+sudo nano /etc/bind/named.conf.local
+# use home.arpa (reserved for home networks). Don't use .local (mDNS).
+
+------------------------------------------------------------
+STEP 4 - THE ZONE FILE
+------------------------------------------------------------
+sudo nano /etc/bind/db.home.arpa
+# Full names end with a dot: ns1.home.arpa.
+# Serial = today's date + 2-digit counter (example: 2026112301). Raise it by 1 on every edit.
+
+------------------------------------------------------------
+STEP 5 - CHECK, THEN RESTART
+------------------------------------------------------------
+sudo named-checkconf                                   # no output = good
+sudo named-checkzone home.arpa /etc/bind/db.home.arpa  # should end with OK
+sudo systemctl restart named
+
+------------------------------------------------------------
+STEP 6 - TEST WITH NSLOOKUP
+------------------------------------------------------------
+nslookup nas.home.arpa 127.0.0.1     # your local name
+nslookup google.com 127.0.0.1        # via the forwarder
+
+------------------------------------------------------------
+STEP 7 - THE 3 ERRORS
+------------------------------------------------------------
+NXDOMAIN   -> the name doesn't exist        -> check the spelling / the record
+SERVFAIL   -> the server tried and failed   -> check the zone file / the forwarder
+timed out  -> nobody answered               -> check the service / port 53
+
+------------------------------------------------------------
+USE IT ON YOUR NETWORK
+------------------------------------------------------------
+sudo ufw allow 53
+# Then set your devices' DNS (or your router's DNS setting) to your server's address.
